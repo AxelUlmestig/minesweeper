@@ -1,13 +1,14 @@
-module Minesweeper (click, Grid, randomizeGrid, showGrid) where
+module Minesweeper (click, Grid, randomizeGrid, showGrid, Tile) where
 
-import Control.Monad.Random (evalRand, fromList)
-import Data.List            (sort)
-import Data.List.Split      (chunksOf)
-import Data.Map             (empty, insert, keys, lookup, Map, mapWithKey, update)
-import Data.Maybe           (catMaybes, fromMaybe)
-import Prelude hiding       (lookup)
-import System.Random        (Random, random, RandomGen, randomR)
-import Text.Printf          (printf)
+import           Control.Monad.Random (evalRand, fromList)
+import           Data.List            (sort)
+import           Data.List.Split      (chunksOf)
+import           Data.Map             (Map, empty, insert, keys, lookup,
+                                       mapWithKey, update)
+import           Data.Maybe           (catMaybes, fromMaybe)
+import           Prelude              hiding (lookup)
+import           System.Random        (Random, RandomGen, random, randomR)
+import           Text.Printf          (printf)
 
 type Grid a = Map Int (Map Int a)
 
@@ -20,9 +21,9 @@ showGrid grid =
         mapOrdered :: Ord k => (a -> b) -> Map k a -> [b]
         mapOrdered f m  = catMaybes $ map (fmap f . flip lookup m) $ sort $ keys m
 
-        showTile (Closed _)         = " |"
-        showTile (Opened (Bomb))    = "b|"
-        showTile (Opened (Safe n))  = printf "%d|" n
+        showTile (Closed _)        = " |"
+        showTile (Opened (Bomb))   = "b|"
+        showTile (Opened (Safe n)) = printf "%d|" n
 
         showRow :: Map Int Tile -> String
         showRow row = '|' : (concat $ mapOrdered showTile row) ++ ('\n' : border)
@@ -55,8 +56,8 @@ assignBombCount grid =
         setCount _ _ (Bomb)         = Bomb
         setCount row col (Safe _)   =
             let
-                isBomb (Bomb)   = True
-                isBomb _        = False
+                isBomb (Bomb) = True
+                isBomb _      = False
 
                 neighbours  = catMaybes $ map (uncurry (lookupGrid grid)) $ getSurrounding row col
                 bombCount   = length $ filter isBomb neighbours
