@@ -1,5 +1,6 @@
 module Main where
 
+import           Data.Bifunctor      (bimap)
 import           Graphics.Vty
 import           Graphics.Vty.Input
 import           System.Console.ANSI
@@ -30,10 +31,10 @@ play vty grid (r, c) = do
 
   e <- nextEvent vty
   case e of
-    (EvKey KDown _)             -> play vty grid (r + 1, c)
-    (EvKey KUp _)               -> play vty grid (r - 1, c)
-    (EvKey KRight _)            -> play vty grid (r, c + 1)
-    (EvKey KLeft _)             -> play vty grid (r, c - 1)
+    (EvKey KDown _)             -> play vty grid $ constrain size (r + 1, c)
+    (EvKey KUp _)               -> play vty grid $ constrain size (r - 1, c)
+    (EvKey KRight _)            -> play vty grid $ constrain size (r, c + 1)
+    (EvKey KLeft _)             -> play vty grid $ constrain size (r, c - 1)
     (EvKey (KChar ' ') _)       -> play vty (click r c grid) (r, c)
     (EvKey (KChar 'c') [MCtrl]) -> do
       shutdown vty
@@ -50,3 +51,7 @@ printPosition vty r c = do
   cursorForward (1 + 2 * c)
   putStrLn "X"
   restoreCursor
+
+constrain :: Int -> (Int, Int) -> (Int, Int)
+constrain limit = bimap f f
+  where f = max 0 . min (size - 1)
