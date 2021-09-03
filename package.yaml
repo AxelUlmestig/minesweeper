@@ -25,6 +25,8 @@ dependencies:
 - containers
 - MonadRandom
 - split
+- ansi-terminal
+- vty
 
 library:
   source-dirs: src
